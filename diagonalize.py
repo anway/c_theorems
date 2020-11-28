@@ -79,7 +79,7 @@ start_time = timeit.default_timer()
 evals, evecs = scipy.linalg.eigh(hamiltonian)
 tot_time = timeit.default_timer() - start_time
 
-#np.savez(args.number + "_" + args.hamiltonian + "_" + args.parameters + ".npz", evals=evals, evecs=evecs)
+np.savez(args.number + "_" + args.hamiltonian + "_" + args.parameters + ".npz", evals=evals, evecs=evecs)
 print(tot_time)
 
 print(evals)
