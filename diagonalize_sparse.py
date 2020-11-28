@@ -28,10 +28,12 @@ def xy_hamiltonian(n, gamma, lamb):
       h = sparse.kron(h, sigma_0) + coeff_x * sparse.kron(sparse.identity(2**(i-1)), xx) + \
          coeff_y * sparse.kron(sparse.identity(2**(i-1)), yy) + lamb * sparse.kron(sparse.identity(2**i), sigma_z)
 
-   # Wrap around
+   """
+   # Wrap around, uncomment for ring rather than chain
    if n > 2:
       h += coeff_x * sparse.kron(sigma_x, sparse.kron(sparse.identity(2**(n-2)), sigma_x)) + \
          coeff_y * sparse.kron(sigma_y, sparse.kron(sparse.identity(2**(n-2)), sigma_y))
+   """
 
    h *= -0.5
    return h
@@ -45,11 +47,13 @@ def xxz_hamiltonian(n, delta, lamb):
       h = sparse.kron(h, sigma_0) + .5 * (sparse.kron(sparse.identity(2**(i-1)), xx) + sparse.kron(sparse.identity(2**(i-1)), yy) + \
          delta * sparse.kron(sparse.identity(2**(i-1)), zz)) + lamb * sparse.kron(sparse.identity(2**i), sigma_z)
 
-   # Last spin
+   """
+   # Wrap around, uncomment for ring rather than chain
    if n > 2:
       h += .5 * (sparse.kron(sigma_x, sparse.kron(sparse.identity(2**(n-2)), sigma_x)) + \
          sparse.kron(sigma_y, sparse.kron(sparse.identity(2**(n-2)), sigma_y)) + \
          delta * sparse.kron(sigma_z, sparse.kron(sparse.identity(2**(n-2)), sigma_z)))
+   """
 
    return h
 
