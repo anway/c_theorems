@@ -26,10 +26,12 @@ def xy_hamiltonian(n, gamma, lamb):
       h = np.kron(h, sigma_0) + coeff_x * np.kron(np.eye(2**(i-1)), xx) + \
          coeff_y * np.kron(np.eye(2**(i-1)), yy) + lamb * np.kron(np.eye(2**i), sigma_z)
 
-   # Wrap around
+   """
+   # Wrap around, uncomment for ring rather than chain
    if n > 2:
       h += coeff_x * np.kron(sigma_x, np.kron(np.eye(2**(n-2)), sigma_x)) + \
          coeff_y * np.kron(sigma_y, np.kron(np.eye(2**(n-2)), sigma_y))
+   """
 
    h *= -0.5
    return h
@@ -43,11 +45,13 @@ def xxz_hamiltonian(n, delta, lamb):
       h = np.kron(h, sigma_0) + .5 * (np.kron(np.eye(2**(i-1)), xx) + np.kron(np.eye(2**(i-1)), yy) + \
          delta * np.kron(np.eye(2**(i-1)), zz)) + lamb * np.kron(np.eye(2**i), sigma_z)
 
-   # Last spin
+   """
+   # Wrap around, uncomment for ring rather than chain
    if n > 2:
       h += .5 * (np.kron(sigma_x, np.kron(np.eye(2**(n-2)), sigma_x)) + \
          np.kron(sigma_y, np.kron(np.eye(2**(n-2)), sigma_y)) + \
          delta * np.kron(sigma_z, np.kron(np.eye(2**(n-2)), sigma_z)))
+   """
 
    return h
 
