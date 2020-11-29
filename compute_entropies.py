@@ -18,15 +18,14 @@ evecs = data["evecs"]
 
 # Assume we are interested in ground state entropies
 minind = np.argmin(evals)
-ground_state = np.matrix(evecs[minind])
-n = int(math.log(len(evecs[minind]), 2))
+ground_state = np.matrix(evecs[:,minind])
+n = int(math.log(len(evecs[:,minind]), 2))
 
 start_time = timeit.default_timer()
 # Iterate over possible lengths of block
 for i in range(1, int(n / 2) + 1):
-   rho = np.outer(ground_state, ground_state.getH())
-   rho_ab = rho.reshape([2**i, 2**(n - i), 2**i, 2**(n - i)])
-   rho_a = np.trace(rho_ab, axis1=1, axis2=3)
+   gs_reshape = ground_state.reshape((2**i, 2**(n-i)))
+   rho_a = gs_reshape * gs_reshape.getH()
    evals = scipy.linalg.eigh(rho_a, eigvals_only=True) 
    entropy = sum(map(lambda x : 0. if np.isclose(x,0.) else -x * math.log(x, 2.), evals))
    entropies.append(entropy)
