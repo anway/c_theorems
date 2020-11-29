@@ -1,5 +1,6 @@
 import argparse
 import numpy as np
+from numpy import linalg
 import scipy
 from scipy import linalg
 import timeit
@@ -26,12 +27,10 @@ def xy_hamiltonian(n, gamma, lamb):
       h = np.kron(h, sigma_0) + coeff_x * np.kron(np.eye(2**(i-1)), xx) + \
          coeff_y * np.kron(np.eye(2**(i-1)), yy) + lamb * np.kron(np.eye(2**i), sigma_z)
 
-   """
-   # Wrap around, uncomment for ring rather than chain
+   # Wrap around
    if n > 2:
       h += coeff_x * np.kron(sigma_x, np.kron(np.eye(2**(n-2)), sigma_x)) + \
          coeff_y * np.kron(sigma_y, np.kron(np.eye(2**(n-2)), sigma_y))
-   """
 
    h *= -0.5
    return h
@@ -45,13 +44,11 @@ def xxz_hamiltonian(n, delta, lamb):
       h = np.kron(h, sigma_0) + .5 * (np.kron(np.eye(2**(i-1)), xx) + np.kron(np.eye(2**(i-1)), yy) + \
          delta * np.kron(np.eye(2**(i-1)), zz)) + lamb * np.kron(np.eye(2**i), sigma_z)
 
-   """
-   # Wrap around, uncomment for ring rather than chain
+   # Wrap around
    if n > 2:
       h += .5 * (np.kron(sigma_x, np.kron(np.eye(2**(n-2)), sigma_x)) + \
          np.kron(sigma_y, np.kron(np.eye(2**(n-2)), sigma_y)) + \
          delta * np.kron(sigma_z, np.kron(np.eye(2**(n-2)), sigma_z)))
-   """
 
    return h
 
@@ -80,11 +77,8 @@ if h_type =="xy":
 elif h_type == "xxz":
    hamiltonian = xxz_hamiltonian(n, float(h_params[0]), float(h_params[1]))
 start_time = timeit.default_timer()
-evals, evecs = scipy.linalg.eigh(hamiltonian)
+evals, evecs = np.linalg.eigh(hamiltonian)
 tot_time = timeit.default_timer() - start_time
 
 np.savez(args.number + "_" + args.hamiltonian + "_" + args.parameters + ".npz", evals=evals, evecs=evecs)
 print(tot_time)
-
-print(evals)
-print(evecs)
