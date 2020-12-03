@@ -52,6 +52,22 @@ def xxz_hamiltonian(n, delta, lamb):
 
    return h
 
+def chaotic_hamiltonian(n, h_param, g_param):
+   # First two spins
+   h = zz + h_param * (np.kron(sigma_z, sigma_0) + np.kron(sigma_0, sigma_z)) + \
+      g_param * (np.kron(sigma_x, sigma_0) + np.kron(sigma_0, sigma_x))
+
+   # Remaining spins
+   for i in range(2, n):
+      h = np.kron(h, sigma_0) + np.kron(np.eye(2**(i-1)), zz) + \
+         h_param * np.kron(np.eye(2**i), sigma_z) + g_param * np.kron(np.eye(2**i), sigma_x)
+
+   # Wrap around
+   if n > 2:
+      h += np.kron(sigma_z, np.kron(np.eye(2**(n-2)), sigma_z))
+
+   return h
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-n", "--number", help="number of spins")
 parser.add_argument("-m", "--hamiltonian", help="Hamiltonian type, xy or xxz")
@@ -76,6 +92,8 @@ if h_type =="xy":
    hamiltonian = xy_hamiltonian(n, float(h_params[0]), float(h_params[1]))
 elif h_type == "xxz":
    hamiltonian = xxz_hamiltonian(n, float(h_params[0]), float(h_params[1]))
+elif h_type=="chaotic":
+   hamiltonian = chaotic_hamiltonian(n, float(h_params[0]), float(h_params[1]))
 start_time = timeit.default_timer()
 evals, evecs = np.linalg.eigh(hamiltonian)
 tot_time = timeit.default_timer() - start_time
