@@ -68,6 +68,102 @@ def chaotic_hamiltonian(n, h_param, g_param):
 
    return h
 
+def ising_hamiltonian(n, g):
+   # First two spins
+   h = -1. * zz + g * np.kron(sigma_x, sigma_0) + g * np.kron(sigma_0, sigma_x)
+
+   # Remaining spins
+   for i in range(2, n):
+      h = np.kron(h, sigma_0) + -1. * np.kron(np.eye(2**(i-1)), zz) + g * np.kron(np.eye(2**i), sigma_x)
+
+   # Wrap around
+   if n > 2:
+      h -= np.kron(sigma_z, np.kron(np.eye(2**(n-2)), sigma_z))
+
+   return h
+
+def cluster_hamiltonian(n):
+   xz = np.kron(sigma_x, sigma_z)
+   zx = np.kron(sigma_z, sigma_x)
+   zxz = np.kron(sigma_z, xz)
+   # First three
+   h = 1. * zxz
+
+   # Remaining spins
+   for i in range(3, n):
+      h = np.kron(h, sigma_0) + np.kron(np.eye(2**(i-2)), zxz)
+
+   # Wrap around
+   h += np.kron(sigma_z, np.kron(np.eye(2**(n-3)), zx)) + np.kron(xz, np.kron(np.eye(2**(n-3)), sigma_z))
+
+   h *= -1.
+   return h
+   
+def mg_hamiltonian(n, gamma):
+   xi = np.kron(sigma_x, sigma_0)
+   yi = np.kron(sigma_y, sigma_0)
+   zi = np.kron(sigma_z, sigma_0)
+   ix = np.kron(sigma_0, sigma_x)
+   iy = np.kron(sigma_0, sigma_y)
+   iz = np.kron(sigma_0, sigma_z)
+   """
+   xix = np.kron(xi, sigma_x)
+   yiy = np.kron(yi, sigma_y)
+   ziz = np.kron(zi, sigma_z)
+   """
+   xix = np.kron(sigma_x, ix)
+   yiy = np.kron(sigma_y, iy)
+   ziz = np.kron(sigma_z, iz)
+
+   # First two spins
+   h = gamma * (xx  + yy + zz)
+
+   # Remaining spins
+   for i in range(2, n):
+      h = np.kron(h, sigma_0) + gamma * (np.kron(np.eye(2**(i-1)), xx) + np.kron(np.eye(2**(i-1)), yy) + \
+         np.kron(np.eye(2**(i-1)), zz)) + gamma / 2. * (np.kron(np.eye(2**(i-2)), xix) + \
+         np.kron(np.eye(2**(i-2)), yiy) + np.kron(np.eye(2**(i-2)), ziz))
+
+   # Wrap around
+   """
+   h += gamma * (np.kron(sigma_x, np.kron(np.eye(2**(n-2)), sigma_x)) + np.kron(sigma_y, np.kron(np.eye(2**(n-2)), sigma_y)) + \
+         np.kron(sigma_z, np.kron(np.eye(2**(n-2)), sigma_z))) + gamma / 2. * (np.kron(sigma_x, np.kron(np.eye(2**(n-3)), xi)) + \
+         np.kron(ix, np.kron(np.eye(2**(n-3)), sigma_x)) + np.kron(sigma_y, np.kron(np.eye(2**(n-3)), yi)) + \
+         np.kron(iy, np.kron(np.eye(2**(n-3)), sigma_y)) + np.kron(sigma_z, np.kron(np.eye(2**(n-3)), zi)) + \
+         np.kron(iz, np.kron(np.eye(2**(n-3)), sigma_z)))
+   """
+   h += gamma * (np.kron(sigma_x, np.kron(np.eye(2**(n-2)), sigma_x)) + np.kron(sigma_y, np.kron(np.eye(2**(n-2)), sigma_y)) + \
+         np.kron(sigma_z, np.kron(np.eye(2**(n-2)), sigma_z)))
+   h += gamma / 2. * (np.kron(sigma_x, np.kron(np.eye(2**(n-3)), xi)) + np.kron(sigma_y, np.kron(np.eye(2**(n-3)), yi)) + \
+         np.kron(sigma_z, np.kron(np.eye(2**(n-3)), zi)))
+   h += gamma / 2. * (np.kron(sigma_0, np.kron(sigma_x, np.kron(np.eye(2**(n-3)), sigma_x))) + \
+      np.kron(sigma_0, np.kron(sigma_y, np.kron(np.eye(2**(n-3)), sigma_y))) + \
+      np.kron(sigma_0, np.kron(sigma_z, np.kron(np.eye(2**(n-3)), sigma_z))))
+
+   return h
+
+
+def chaotic_nnn_hamiltonian(n, gamma, ratio):
+   zi = np.kron(sigma_z, sigma_0)
+   iz = np.kron(sigma_0, sigma_z)
+   ziz = np.kron(sigma_z, iz)
+
+   # First two spins
+   h = gamma * (xx  + yy + zz)
+
+   # Remaining spins
+   for i in range(2, n):
+      h = np.kron(h, sigma_0) + gamma * (np.kron(np.eye(2**(i-1)), xx) + np.kron(np.eye(2**(i-1)), yy) + \
+         np.kron(np.eye(2**(i-1)), zz)) + gamma * ratio * np.kron(np.eye(2**(i-2)), ziz)
+
+   # Wrap around
+   h += gamma * (np.kron(sigma_x, np.kron(np.eye(2**(n-2)), sigma_x)) + np.kron(sigma_y, np.kron(np.eye(2**(n-2)), sigma_y)) + \
+         np.kron(sigma_z, np.kron(np.eye(2**(n-2)), sigma_z)))
+   h += gamma * ratio * np.kron(sigma_z, np.kron(np.eye(2**(n-3)), zi))
+   h += gamma * ratio * np.kron(sigma_0, np.kron(sigma_z, np.kron(np.eye(2**(n-3)), sigma_z)))
+
+   return h
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-n", "--number", help="number of spins")
 parser.add_argument("-m", "--hamiltonian", help="Hamiltonian type, xy or xxz")
@@ -76,15 +172,15 @@ args = parser.parse_args()
 
 n = int(args.number)
 h_type = args.hamiltonian
-h_params = args.parameters.split(":")
+if args.parameters:
+   h_params = args.parameters.split(":")
 
 try:
    if n < 2:
       raise ValueError("n needs to be >= 2")
-   if len(h_params) != 2:
-      raise ValueError("exactly two parameters need to be specified.")
-   if h_type != "xy" and h_type != "xxz":
-      raise ValueError("Hamiltonian type needs to be either xy or xxz.")
+   if args.parameters:
+      if len(h_params) != 2:
+         raise ValueError("exactly two parameters need to be specified.")
 except ValueError as exp:
    print("Error", exp)
 
@@ -94,9 +190,20 @@ elif h_type == "xxz":
    hamiltonian = xxz_hamiltonian(n, float(h_params[0]), float(h_params[1]))
 elif h_type=="chaotic":
    hamiltonian = chaotic_hamiltonian(n, float(h_params[0]), float(h_params[1]))
+elif h_type=="ising":
+   hamiltonian = ising_hamiltonian(n, float(h_params[0]))
+elif h_type=="cluster":
+   hamiltonian = cluster_hamiltonian(n)
+elif h_type=="mg":
+   hamiltonian = mg_hamiltonian(n, float(h_params[0]))
+elif h_type=="chaotic_nnn":
+   hamiltonian = chaotic_nnn_hamiltonian(n, float(h_params[0]), float(h_params[1]))
 start_time = timeit.default_timer()
 evals, evecs = np.linalg.eigh(hamiltonian)
 tot_time = timeit.default_timer() - start_time
 
-np.savez(args.number + "_" + args.hamiltonian + "_" + args.parameters + ".npz", evals=evals, evecs=evecs)
+if args.parameters:
+   np.savez(args.number + "_" + args.hamiltonian + "_" + args.parameters + ".npz", evals=evals, evecs=evecs)
+else:
+   np.savez(args.number + "_" + args.hamiltonian + ".npz", evals=evals, evecs=evecs)
 print(tot_time)
